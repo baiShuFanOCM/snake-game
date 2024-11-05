@@ -1,0 +1,23 @@
+/* 修改操作区域的样式 */
+.operation-area {
+  max-height: calc(100vh - 200px); /* 设置最大高度，减去其他区域的高度 */
+  overflow-y: auto; /* 添加垂直滚动条 */
+  padding: 20px;
+  width: 100%;
+}
+
+/* 确保内容区域响应式布局 */
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0; /* 防止内容溢出 */
+}
+
+/* 优化移动端显示 */
+@media screen and (max-width: 768px) {
+  .operation-area {
+    max-height: calc(100vh - 150px);
+    padding: 10px;
+  }
+} 

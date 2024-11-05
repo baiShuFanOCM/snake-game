@@ -35,14 +35,30 @@
     </div>
 
     <div class="controls">
-      <button @click="startGame" :disabled="isPlaying">开始游戏</button>
+      <button 
+        v-if="!isPlaying" 
+        @click="confirmStart"
+        class="start-btn"
+      >
+        开始游戏
+      </button>
       <button @click="pauseGame" :disabled="!isPlaying">暂停</button>
     </div>
+
+    <ConfirmDialog
+      v-model="showConfirmDialog"
+      title="开始游戏"
+      message="准备好开始游戏了吗？"
+      confirm-text="开始游戏"
+      cancel-text="取消"
+      @confirm="handleConfirm"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import ConfirmDialog from './ConfirmDialog.vue'
 
 const BOARD_SIZE = 20
 const INITIAL_SPEED = 150
@@ -55,6 +71,8 @@ const highScore = ref(0)
 const isPlaying = ref(false)
 const isEating = ref(false)
 const gameInterval = ref<ReturnType<typeof setInterval> | null>(null)
+const isGameStarted = ref(false)
+const showConfirmDialog = ref(false)
 
 // 添加计算属性来扁平化游戏板
 const flatBoard = computed(() => board.value.flat())
@@ -168,6 +186,7 @@ const pauseGame = () => {
 // 游戏结束
 const gameOver = () => {
   pauseGame()
+  isGameStarted.value = false
   if (score.value > highScore.value) {
     highScore.value = score.value
   }
@@ -179,29 +198,16 @@ const handleKeydown = (e: KeyboardEvent) => {
   if (!isPlaying.value) return
 
   const key = e.key.toLowerCase()
-  const opposites = {
-    up: 'down',
-    down: 'up',
-    left: 'right',
-    right: 'left',
-  }
+  const currentDirection = direction.value
 
-  if (['arrowup', 'w'].includes(key) && direction.value !== opposites.up) {
+  // 修���方向判断逻辑
+  if (['arrowup', 'w'].includes(key) && currentDirection !== 'down') {
     direction.value = 'up'
-  } else if (
-    ['arrowdown', 's'].includes(key) &&
-    direction.value !== opposites.down
-  ) {
+  } else if (['arrowdown', 's'].includes(key) && currentDirection !== 'up') {
     direction.value = 'down'
-  } else if (
-    ['arrowleft', 'a'].includes(key) &&
-    direction.value !== opposites.left
-  ) {
+  } else if (['arrowleft', 'a'].includes(key) && currentDirection !== 'right') {
     direction.value = 'left'
-  } else if (
-    ['arrowright', 'd'].includes(key) &&
-    direction.value !== opposites.right
-  ) {
+  } else if (['arrowright', 'd'].includes(key) && currentDirection !== 'left') {
     direction.value = 'right'
   }
 }
@@ -237,6 +243,30 @@ const getHeadDirection = () => ({
   'head-left': direction.value === 'left',
   'head-right': direction.value === 'right',
 })
+
+// 修改确认开始函数
+const confirmStart = () => {
+  showConfirmDialog.value = true
+}
+
+const handleConfirm = () => {
+  startGameHandler()
+}
+
+// 修改 startGameHandler 函数，确保正确初始化游戏
+const startGameHandler = () => {
+  isGameStarted.value = true
+  isPlaying.value = true
+  score.value = 0
+  initBoard()
+  snake.value = [{ x: 2, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 0 }]
+  direction.value = 'right'
+  generateFood()
+  if (gameInterval.value) {
+    clearInterval(gameInterval.value)
+  }
+  gameInterval.value = setInterval(moveSnake, INITIAL_SPEED)
+}
 </script>
 
 <style scoped>
