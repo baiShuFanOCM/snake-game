@@ -166,13 +166,13 @@ const checkCollision = (head: { x: number; y: number }) => {
 }
 
 // 开始游戏
-const startGame = () => {
-  initBoard()
-  initSnake()
-  generateFood()
-  isPlaying.value = true
-  gameInterval.value = setInterval(moveSnake, INITIAL_SPEED)
-}
+// const startGame = () => {
+//   initBoard()
+//   initSnake()
+//   generateFood()
+//   isPlaying.value = true
+//   gameInterval.value = setInterval(moveSnake, INITIAL_SPEED)
+// }
 
 // 暂停游戏
 const pauseGame = () => {
